@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { BookOpen, Sparkles, Zap, Target } from "lucide-react";
 
 const Home: React.FC = () => {
@@ -13,18 +14,18 @@ const Home: React.FC = () => {
         </p>
 
         <div className="flex justify-center gap-4">
-          <a
-            href="/modes/ask-mode"
+          <Link
+            to="/modes/ask-mode"
             className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
           >
             Commencer
-          </a>
-          <a
-            href="/custom-agents"
+          </Link>
+          <Link
+            to="/custom-agents"
             className="px-6 py-3 bg-gray-200 dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors font-medium"
           >
             Agents Personnalisés
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -111,8 +112,8 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   link,
 }) => {
   return (
-    <a
-      href={link}
+    <Link
+      to={link}
       className="block p-6 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 hover:border-primary-500 dark:hover:border-primary-500 transition-colors group"
     >
       <div className="mb-4">{icon}</div>
@@ -120,7 +121,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
         {title}
       </h3>
       <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
-    </a>
+    </Link>
   );
 };
 
@@ -132,15 +133,15 @@ interface QuickLinkProps {
 
 const QuickLink: React.FC<QuickLinkProps> = ({ title, description, link }) => {
   return (
-    <a
-      href={link}
+    <Link
+      to={link}
       className="block p-4 bg-gray-50 dark:bg-slate-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
     >
       <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
         {title}
       </h3>
       <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
-    </a>
+    </Link>
   );
 };
 

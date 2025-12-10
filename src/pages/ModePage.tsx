@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { copilotModes } from "../data/documentation";
 import CodeBlock from "../components/CodeBlock";
@@ -7,7 +7,24 @@ import { AlertCircle, Lightbulb, ArrowRight } from "lucide-react";
 
 const ModePage: React.FC = () => {
   const { modeId } = useParams<{ modeId: string }>();
-  const mode = copilotModes.find((m) => m.id === modeId);
+  const modeMeta = copilotModes.find((m) => m.id === modeId);
+  const [mode, setMode] = React.useState(modeMeta ?? null);
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    let mounted = true;
+    if (modeMeta && modeMeta.loader) {
+      setLoading(true);
+      modeMeta.loader().then((content) => {
+        if (!mounted) return;
+        setMode({ ...modeMeta, content });
+        setLoading(false);
+      });
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [modeId]);
 
   if (!mode) {
     return (
@@ -35,33 +52,37 @@ const ModePage: React.FC = () => {
       </header>
 
       <div className="prose dark:prose-invert max-w-none">
-        <ReactMarkdown
-          components={{
-            h2: ({ children }) => (
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">
-                {children}
-              </h2>
-            ),
-            h3: ({ children }) => (
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
-                {children}
-              </h3>
-            ),
-            p: ({ children }) => (
-              <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-                {children}
-              </p>
-            ),
-            ul: ({ children }) => (
-              <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-2 mb-4">
-                {children}
-              </ul>
-            ),
-            li: ({ children }) => <li className="ml-4">{children}</li>,
-          }}
-        >
-          {mode.content}
-        </ReactMarkdown>
+        {loading ? (
+          <p>Chargement...</p>
+        ) : (
+          <ReactMarkdown
+            components={{
+              h2: ({ children }) => (
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">
+                  {children}
+                </h2>
+              ),
+              h3: ({ children }) => (
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
+                  {children}
+                </h3>
+              ),
+              p: ({ children }) => (
+                <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+                  {children}
+                </p>
+              ),
+              ul: ({ children }) => (
+                <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-2 mb-4">
+                  {children}
+                </ul>
+              ),
+              li: ({ children }) => <li className="ml-4">{children}</li>,
+            }}
+          >
+            {mode.content}
+          </ReactMarkdown>
+        )}
       </div>
 
       {mode.examples && mode.examples.length > 0 && (
@@ -125,16 +146,16 @@ const ModePage: React.FC = () => {
           </h3>
           <div className="grid md:grid-cols-2 gap-4">
             {mode.relatedLinks.map((link, index) => (
-              <a
+              <Link
                 key={index}
-                href={link.path}
+                to={link.path}
                 className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors group"
               >
                 <span className="font-medium text-gray-900 dark:text-white">
                   {link.title}
                 </span>
                 <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
-              </a>
+              </Link>
             ))}
           </div>
         </section>

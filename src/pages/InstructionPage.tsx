@@ -7,7 +7,24 @@ import { AlertCircle, Lightbulb } from "lucide-react";
 
 const InstructionPage: React.FC = () => {
   const { instructionId } = useParams<{ instructionId: string }>();
-  const instruction = instructionsData.find((i) => i.id === instructionId);
+  const instructionMeta = instructionsData.find((i) => i.id === instructionId);
+  const [instruction, setInstruction] = React.useState(instructionMeta ?? null);
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    let mounted = true;
+    if (instructionMeta && instructionMeta.loader) {
+      setLoading(true);
+      instructionMeta.loader().then((content) => {
+        if (!mounted) return;
+        setInstruction({ ...instructionMeta, content });
+        setLoading(false);
+      });
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [instructionId]);
 
   if (!instruction) {
     return (
@@ -35,33 +52,37 @@ const InstructionPage: React.FC = () => {
       </header>
 
       <div className="prose dark:prose-invert max-w-none">
-        <ReactMarkdown
-          components={{
-            h2: ({ children }) => (
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">
-                {children}
-              </h2>
-            ),
-            h3: ({ children }) => (
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
-                {children}
-              </h3>
-            ),
-            p: ({ children }) => (
-              <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-                {children}
-              </p>
-            ),
-            ul: ({ children }) => (
-              <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-2 mb-4">
-                {children}
-              </ul>
-            ),
-            li: ({ children }) => <li className="ml-4">{children}</li>,
-          }}
-        >
-          {instruction.content}
-        </ReactMarkdown>
+        {loading ? (
+          <p>Chargement...</p>
+        ) : (
+          <ReactMarkdown
+            components={{
+              h2: ({ children }) => (
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">
+                  {children}
+                </h2>
+              ),
+              h3: ({ children }) => (
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">
+                  {children}
+                </h3>
+              ),
+              p: ({ children }) => (
+                <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+                  {children}
+                </p>
+              ),
+              ul: ({ children }) => (
+                <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-2 mb-4">
+                  {children}
+                </ul>
+              ),
+              li: ({ children }) => <li className="ml-4">{children}</li>,
+            }}
+          >
+            {instruction.content}
+          </ReactMarkdown>
+        )}
       </div>
 
       {instruction.examples && instruction.examples.length > 0 && (

@@ -16,8 +16,9 @@ const SearchBar: React.FC = () => {
 
   const allDocs = [...copilotModes, ...instructionsData, ...customAgentsData];
 
+  // Index only metadata (title, description) to avoid triggering markdown loaders
   const fuse = new Fuse(allDocs, {
-    keys: ["title", "description", "content"],
+    keys: ["title", "description"],
     threshold: 0.3,
     includeScore: true,
   });
