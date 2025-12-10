@@ -12,6 +12,7 @@ const SearchBar: React.FC = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const contentCache = React.useRef(new Map<string, string>());
   const navigate = useNavigate();
 
   const allDocs = [...copilotModes, ...instructionsData, ...customAgentsData];
@@ -26,7 +27,45 @@ const SearchBar: React.FC = () => {
   useEffect(() => {
     if (query.length > 1) {
       const searchResults = fuse.search(query);
-      setResults(searchResults.slice(0, 5));
+      const sliced = searchResults.slice(0, 5);
+      setResults(sliced);
+      // Preload content for visible results that have loaders
+      const loaders: Promise<void>[] = [];
+      sliced.forEach((r) => {
+        const doc = r.item;
+        if (doc.loader && !contentCache.current.has(doc.id)) {
+          const p = doc
+            .loader()
+            .then((res: unknown) => {
+              let text = "";
+              if (typeof res === "string") {
+                text = res;
+              } else if (res && typeof res === "object") {
+                // some bundlers return { default: string }
+                try {
+                  const anyRes = res as any;
+                  if (typeof anyRes.default === "string") {
+                    text = anyRes.default;
+                  } else {
+                    text = String(res);
+                  }
+                } catch {
+                  text = String(res);
+                }
+              } else {
+                text = String(res);
+              }
+              contentCache.current.set(doc.id, text);
+            })
+            .catch(() => {
+              contentCache.current.set(doc.id, "");
+            });
+          loaders.push(p as Promise<void>);
+        }
+      });
+      if (loaders.length > 0) {
+        Promise.all(loaders).catch(() => {});
+      }
       setIsOpen(true);
     } else {
       setResults([]);
@@ -83,7 +122,20 @@ const SearchBar: React.FC = () => {
                   {result.item.title}
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-                  {result.item.description}
+                  {contentCache.current.has(result.item.id)
+                    ? // show preview from loaded content
+                      (() => {
+                        const txt =
+                          contentCache.current.get(result.item.id) || "";
+                        const preview = txt
+                          .trim()
+                          .replace(/\n+/g, " ")
+                          .slice(0, 200);
+                        return preview.length > 0
+                          ? preview + "..."
+                          : result.item.description;
+                      })()
+                    : result.item.description}
                 </div>
               </button>
             ))}
