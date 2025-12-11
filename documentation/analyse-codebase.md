@@ -1,10 +1,10 @@
-# Analyse de la codebase
+ex# Analyse de la codebase
 
 Date : 2025-12-10
 
 ## Résumé rapide
 
-Projet : Single Page Application React + TypeScript construite avec Vite. Le projet regroupe une documentation interactive (modes, instructions, agents personnalisés) exposée via des constantes dans `src/data/documentation.ts` et rendue par des pages React.
+Projet : Single Page Application React + TypeScript construite avec Vite. Le projet regroupe une documentation interactive (modes, instructions, agents personnalisés) fournie en contenu Markdown dans `src/content/` puis exposée via des modules de données sous `src/data/` et rendue par des pages React.
 
 ## Démarrage rapide
 
@@ -56,24 +56,28 @@ npm run preview# prévisualise le build localement
   - `/custom-agents` → `CustomAgentsPage`
   - `*` → redirige vers `/`
 
-- Données : centralisées dans `src/data/documentation.ts` et importées par les pages et la barre de recherche
-- Recherche : implémentée côté client dans `SearchBar` (indexation des données de `documentation.ts`) via `Fuse.js`.
-  - Les champs indexés : `title`, `description`, `content`.
+- Données : le contenu Markdown est placé sous `src/content/` ; les tableaux exportés sont désormais répartis en modules légers :
+
+  - `src/data/modes.ts`, `src/data/instructions.ts`, `src/data/agents.ts` (données + métadonnées)
+  - `src/data/documentation.ts` sert d'index compact (réexport + `navigation`).
+  - Les loaders : `src/data/loaders.ts` fournit `rawLoader()` qui effectue un import dynamique des `.md` au runtime.
+
+- Recherche : implémentée côté client dans `SearchBar` via `Fuse.js`.
+  - Indexation : **uniquement** `title` et `description` (pour éviter de déclencher le chargement des Markdown à chaque saisie).
   - Seuil de similarité : `threshold: 0.3`.
-  - Résultats limités à 5 et navigation automatique vers la route correspondante :
-    - si l'ID correspond à `copilotModes` → `/modes/:id`
-    - si l'ID correspond à `instructionsData` → `/instructions/:id`
-    - si l'ID correspond à `customAgentsData` → `/custom-agents`
-- Syntax highlighting : `CodeBlock` utilise `prism-react-renderer` ou équivalent
+  - Résultats limités à 5 ; la `SearchBar` précharge (lazy) le contenu Markdown des résultats visibles via les `loader()` pour afficher un aperçu (snippet ~200 caractères).
+  - Mapping des routes inchangé : `copilotModes` → `/modes/:id`, `instructionsData` → `/instructions/:id`, `customAgentsData` → `/custom-agents`.
+    -- Syntax highlighting : `CodeBlock` utilise `prism-react-renderer`
 - Thème : Tailwind CSS (config dans `tailwind.config.js`), dark mode géré via une classe `dark` sur le `document.documentElement`.
   - `Layout` expose `isDarkMode` et bascule la classe `dark` via un `useEffect`.
   - Recommandation : persister `isDarkMode` dans `localStorage` pour garder la préférence entre sessions.
 
 ## Composants et responsabilités
 
-- `Layout` : conteneur global, bascule du thème, état du sidebar
-  - `isSidebarOpen` (state local) contrôle l'affichage de la `Sidebar` et l'offset du `main` (`ml-64` quand ouvert)
-  - `Header` reçoit des callbacks pour ouvrir/fermer la sidebar et basculer le thème
+-- `Layout` : conteneur global, bascule du thème, état du sidebar
+
+- `isSidebarOpen` (state local) contrôle l'affichage de la `Sidebar` et l'offset du `main` (`ml-64` quand ouvert)
+- `Header` reçoit des callbacks pour ouvrir/fermer la sidebar et basculer le thème
 - `Header` : contient la barre de recherche et éléments de navigation globaux
 - `Sidebar` : navigation latérale, génère les liens à partir de `navigation` dans `documentation.ts`
 - `SearchBar` : recherche full-text et navigation vers les pages correspondantes
@@ -92,7 +96,7 @@ npm run preview# prévisualise le build localement
 ## Sécurité & bonnes pratiques
 
 - Vérifier l'absence de secrets dans le repo (API keys dans `src/` ou `public/`)
-- Activer `strict` dans `tsconfig.json` si ce n'est pas déjà fait
+- Activer `strict` dans `tsconfig.json` (déjà activé ici)
 - Centraliser les appels réseau dans un dossier `src/services` et typer les réponses
 
 ## Recommandations d'amélioration
@@ -102,6 +106,11 @@ npm run preview# prévisualise le build localement
 - Persister la préférence du thème dans `localStorage` (dans `Layout`)
 - Documenter le format des données dans `src/data/documentation.ts` (types et exemples)
 - Ajouter un script `analyze` pour analyser la taille du bundle Vite
+
+Autres notes techniques récentes :
+
+- Le loader dynamique utilise `import(/* @vite-ignore */ path + "?raw")` pour permettre l'import runtime de fichiers Markdown sans lourde configuration. C'est volontaire et maintient le lazy-loading.
+- `src/data/documentation.ts` inclut maintenant une validation runtime qui avertit en cas d'IDs dupliqués.
 
 ## Liens utiles (fichiers clés)
 
@@ -113,7 +122,10 @@ npm run preview# prévisualise le build localement
 - `tsconfig.json` / `tsconfig.node.json`
 - `vite.config.ts`
 - `tailwind.config.js` / `postcss.config.js`
-- `src/data/documentation.ts`
+- `src/data/documentation.ts` (index compact)
+  - `src/data/modes.ts`, `src/data/instructions.ts`, `src/data/agents.ts` (données)
+  - `src/data/loaders.ts` (helper `rawLoader`)
+  - `src/data/types.ts` (interfaces centrales)
 - `src/components/Layout.tsx`
 - `src/components/Header.tsx`
 - `src/components/Sidebar.tsx`
