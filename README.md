@@ -18,7 +18,7 @@ Une Single Page Application (SPA) complète pour documenter GitHub Copilot, cons
 - **Framework**: React 18.2
 - **Langage**: TypeScript 5.2
 - **Build Tool**: Vite 5.0
-- **Routing**: React Router DOM 6.20
+- **Routing**: React Router DOM 6.30.2
 - **Styling**: Tailwind CSS 3.4
 - **Markdown**: React Markdown 9.0
 - **Syntax Highlighting**: Prism React Renderer 2.3
@@ -54,25 +54,34 @@ L'application sera accessible sur `http://localhost:5173/`
 ```
 c:\DEV\Github-Copilot/
 ├── public/
-│   └── copilot-icon.svg
+│   └── lafouine-icon.svg
 ├── src/
+│   ├── content/
+│   │   ├── agents/                 # Fichiers Markdown pour les agents
+│   │   ├── instructions/           # Fichiers Markdown pour les instructions
+│   │   ├── modes/                  # Fichiers Markdown pour les modes
 │   ├── components/
-│   │   ├── CodeBlock.tsx       # Composant de bloc de code avec copie
-│   │   ├── Header.tsx          # En-tête avec recherche et toggle dark mode
-│   │   ├── Layout.tsx          # Layout principal de l'application
-│   │   ├── SearchBar.tsx       # Barre de recherche avec Fuse.js
-│   │   └── Sidebar.tsx         # Menu latéral de navigation
+│   │   ├── CodeBlock.tsx           # Composant de bloc de code avec copie
+│   │   ├── Header.tsx              # En-tête avec recherche et toggle dark mode
+│   │   ├── Layout.tsx              # Layout principal de l'application
+│   │   ├── SearchBar.tsx           # Barre de recherche avec Fuse.js
+│   │   └── Sidebar.tsx             # Menu latéral de navigation
 │   ├── data/
-│   │   └── documentation.ts    # Contenu structuré de la documentation
+│   │   ├── agents.ts               # Métadonnées + loader pour les agents personnalisés
+│   │   ├── documentation.ts        # Index central qui importe les modules
+│   │   ├── instructions.ts         # Métadonnées + loader pour les instructions
+│   │   ├── loaders.ts              # Helper `rawLoader(path)` pour import dynamique
+│   │   ├── modes.ts                # Métadonnées + loader pour les modes
+│   │   └── types.ts                # Types partagés (DocSection, NavigationItem...)
 │   ├── pages/
 │   │   ├── CustomAgentsPage.tsx    # Page agents personnalisés
 │   │   ├── Home.tsx                # Page d'accueil
 │   │   ├── InstructionPage.tsx     # Page instructions/prompts
 │   │   └── ModePage.tsx            # Page modes Copilot
-│   ├── App.tsx                 # Configuration des routes
-│   ├── index.css               # Styles globaux + Tailwind
-│   ├── main.tsx                # Point d'entrée React
-│   └── vite-env.d.ts          # Types Vite
+│   ├── App.tsx                     # Configuration des routes
+│   ├── index.css                   # Styles globaux + Tailwind
+│   ├── main.tsx                    # Point d'entrée React
+│   └── vite-env.d.ts               # Types Vite
 ├── index.html
 ├── package.json
 ├── postcss.config.js
@@ -139,7 +148,3 @@ Les contributions sont les bienvenues ! Cette application est conçue pour être
 ## 📄 Licence
 
 MIT
-
----
-
-**Construit avec ❤️ par un senior front-end engineer avec 15 ans d'expérience**

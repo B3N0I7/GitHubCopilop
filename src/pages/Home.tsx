@@ -7,7 +7,7 @@ const Home: React.FC = () => {
     <div className="space-y-12">
       <section className="text-center py-12">
         <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          GitHub Copilot
+          GitHub Copilot By Lafouine
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
           Documentation ultime pour maîtriser votre assistant IA

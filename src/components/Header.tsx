@@ -28,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-2">
             <Github className="w-6 h-6 text-gray-900 dark:text-white" />
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              GitHub Copilot Docs
+              GitHub Copilot Docs By Lafouine
             </h1>
           </div>
         </div>
